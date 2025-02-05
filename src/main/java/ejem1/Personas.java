@@ -9,6 +9,8 @@ import java.util.List;
 public class Personas {
     private static final List<Persona> personas = new ArrayList<>();
 
+    
+
     @POST
     @Consumes({ MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON })
     public void guardar(Persona nuevaPersona) {
@@ -34,8 +36,9 @@ public class Personas {
     }
 
     @GET
+    //http://localhost:8080/tema5maven/rest/personas/buscar?cadena=
     @Path("buscar")
-    public ArrayList<Persona> ver(@QueryParam("cadena") String cadena) {
+    public ArrayList<Persona> ver(@QueryParam("cadena") @DefaultValue("a") String cadena) {
         ArrayList<Persona> coincidencias = new ArrayList<>();
         for (Persona persona : personas) {
             if (persona.getNombre().toLowerCase().contains(cadena.toLowerCase())) {
@@ -53,4 +56,27 @@ public class Personas {
         Persona p = new Persona(id, nombre, false, sexo);
         personas.add(p);
     }
+
+    @POST
+    @Path("add")
+    @Consumes({ MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON })
+    public void add(List<Persona> multiplesPersonas){
+        for (Persona persona : multiplesPersonas) {
+            personas.add(persona);
+        }
+    }
+
+    @DELETE
+    @Path("id")
+    public void eliminarId(@QueryParam("id") int id){
+        for (Persona persona : personas) {
+            if (persona.getId()== id) {
+                personas.remove(persona);
+            }
+        }
+    }
+
+    @GET
+    @Path("xml")
+
 }
