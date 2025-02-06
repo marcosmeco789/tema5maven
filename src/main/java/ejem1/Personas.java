@@ -8,6 +8,7 @@ import java.util.List;
 @Path("/personas")
 public class Personas {
     private static final List<Persona> personas = new ArrayList<>();
+    private static final List<PersonaGalego> personasGalego = new ArrayList<>();
 
     
 
@@ -52,9 +53,12 @@ public class Personas {
     @Consumes("application/x-www-form-urlencoded")
     @Produces(MediaType.APPLICATION_JSON)
     public void personaFormulario(@FormParam("id") int id, @FormParam("nombre") String nombre,
-            @FormParam("casado") Boolean casado, @FormParam("sexo") String sexo) {
-        Persona p = new Persona(id, nombre, false, sexo);
+            @FormParam("casado") String casado, @FormParam("sexo") String sexo) {
+        boolean isCasado = Boolean.parseBoolean(casado);
+        Persona p = new Persona(id, nombre, isCasado, sexo);
+        PersonaGalego pg = new PersonaGalego(id, nombre, isCasado, sexo);
         personas.add(p);
+        personasGalego.add(pg);
     }
 
     @POST
@@ -77,6 +81,25 @@ public class Personas {
     }
 
     @GET
+    //http://localhost:8080/tema5maven/rest/personas/xml?id=1
     @Path("xml")
+    @Produces({ MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON })
+    public Persona ej10(@QueryParam("id") int id){
+        for (Persona persona : personas) {
+            if (persona.getId()== id) {
+                return persona;
+            }
+        }
+        return null;
+    }
+
+
+    @GET
+    //http://localhost:8080/tema5maven/rest/personas/galego
+    @Path("galego")
+    @Produces({ MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON })
+    public List<PersonaGalego> listarGalego() {
+        return personasGalego;
+    }
 
 }

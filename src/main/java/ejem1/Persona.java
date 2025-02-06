@@ -1,5 +1,6 @@
 package ejem1;
 
+import jakarta.xml.bind.annotation.XmlAttribute;
 import jakarta.xml.bind.annotation.XmlElement;
 import jakarta.xml.bind.annotation.XmlRootElement;
 import java.io.Serializable;
@@ -22,7 +23,8 @@ public class Persona implements Serializable {
         this.sexo = sexo;
     }
 
-    @XmlElement // Indica que este campo debe ser incluido en la representación XML
+    
+    @XmlAttribute
     public int getId() {
         return id;
     }
