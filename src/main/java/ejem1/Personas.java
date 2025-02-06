@@ -2,6 +2,8 @@ package ejem1;
 
 import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.MediaType;
+import jakarta.ws.rs.core.Response;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -9,8 +11,6 @@ import java.util.List;
 public class Personas {
     private static final List<Persona> personas = new ArrayList<>();
     private static final List<PersonaGalego> personasGalego = new ArrayList<>();
-
-    
 
     @POST
     @Consumes({ MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON })
@@ -25,19 +25,21 @@ public class Personas {
     }
 
     @GET
+    //http://localhost:8080/tema5maven/rest/personas/juan
     @Path("/{nombre}")
     @Produces({ MediaType.APPLICATION_JSON })
-    public Persona buscar(@PathParam("nombre") String nombre) {
+    public Response buscar(@PathParam("nombre") String nombre) {
         for (Persona persona : personas) {
             if (persona.getNombre().equalsIgnoreCase(nombre)) {
-                return persona;
+                return Response.ok(persona).build();
             }
         }
-        return null;
+        return Response.status(Response.Status.NOT_FOUND).entity("No se ha encontrado a la persona").build();
+
     }
 
     @GET
-    //http://localhost:8080/tema5maven/rest/personas/buscar?cadena=
+    // http://localhost:8080/tema5maven/rest/personas/buscar?cadena=
     @Path("buscar")
     public ArrayList<Persona> ver(@QueryParam("cadena") @DefaultValue("a") String cadena) {
         ArrayList<Persona> coincidencias = new ArrayList<>();
@@ -64,7 +66,7 @@ public class Personas {
     @POST
     @Path("add")
     @Consumes({ MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON })
-    public void add(List<Persona> multiplesPersonas){
+    public void add(List<Persona> multiplesPersonas) {
         for (Persona persona : multiplesPersonas) {
             personas.add(persona);
         }
@@ -72,30 +74,29 @@ public class Personas {
 
     @DELETE
     @Path("id")
-    public void eliminarId(@QueryParam("id") int id){
+    public void eliminarId(@QueryParam("id") int id) {
         for (Persona persona : personas) {
-            if (persona.getId()== id) {
+            if (persona.getId() == id) {
                 personas.remove(persona);
             }
         }
     }
 
     @GET
-    //http://localhost:8080/tema5maven/rest/personas/xml?id=1
+    // http://localhost:8080/tema5maven/rest/personas/xml?id=1
     @Path("xml")
     @Produces({ MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON })
-    public Persona ej10(@QueryParam("id") int id){
+    public Persona ej10(@QueryParam("id") int id) {
         for (Persona persona : personas) {
-            if (persona.getId()== id) {
+            if (persona.getId() == id) {
                 return persona;
             }
         }
         return null;
     }
 
-
     @GET
-    //http://localhost:8080/tema5maven/rest/personas/galego
+    // http://localhost:8080/tema5maven/rest/personas/galego
     @Path("galego")
     @Produces({ MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON })
     public List<PersonaGalego> listarGalego() {
