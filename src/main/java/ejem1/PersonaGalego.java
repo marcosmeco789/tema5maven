@@ -32,7 +32,7 @@ public class PersonaGalego implements Serializable {
         this.id = id;
     }
 
-    @XmlElement
+    @XmlElement // mal, no es getnome, es getNombre y se pone un atributo xml q esta en los apuntes
     public String getnome() {
         return nome;
     }
