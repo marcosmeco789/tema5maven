@@ -225,18 +225,17 @@ public class Deportistas {
         }
         conexion.close();
 
-        GenericEntity<ArrayList<Deportista>> deportistaEntity = new GenericEntity<ArrayList<Deportista>>(deportistas){};
+        GenericEntity<ArrayList<Deportista>> deportistaEntity = new GenericEntity<ArrayList<Deportista>>(deportistas) {
+        };
         return Response.ok(deportistaEntity).build();
     }
 
-
-    // ej10: Activos por deporte (/deporte/{nombreDeporte}/activos): Lista los deportistas activos de un deporte.
     @GET
     @Path("/deporte/{nombreDeporte}/activos")
-    @Produces (MediaType.APPLICATION_XML)
-    public Response ej10(@PathParam("nombreDeporte") String nombreDeporte) throws SQLException{
+    @Produces(MediaType.APPLICATION_XML)
+    public Response ej10(@PathParam("nombreDeporte") String nombreDeporte) throws SQLException {
         abrirConexion("ad_tema6", "localhost", "root", "");
-        String query = "SELECT * from deportistas WHERE deporte = '"+nombreDeporte+"' AND activo = 1";
+        String query = "SELECT * from deportistas WHERE deporte = '" + nombreDeporte + "' AND activo = 1";
         ResultSet rs = this.conexion.createStatement().executeQuery(query);
         ArrayList<Deportista> deportistas = new ArrayList<>();
 
@@ -250,10 +249,43 @@ public class Deportistas {
             deportistas.add(d);
         }
 
-        GenericEntity<ArrayList<Deportista>> deportistaEntity = new GenericEntity<ArrayList<Deportista>>(deportistas){};
+        GenericEntity<ArrayList<Deportista>> deportistaEntity = new GenericEntity<ArrayList<Deportista>>(deportistas) {
+        };
         return Response.ok(deportistaEntity).build();
     }
 
+    // EJ11: Contar deportistas (/sdepor): Cuenta el número de deportistas distintos
+    @GET
+    @Path("/sdepor")
+    public Response ej11() throws SQLException {
+        abrirConexion("ad_tema6", "localhost", "root", "");
+        String query = "SELECT COUNT(DISTINCT id) FROM deportistas;";
+    
+        ResultSet rs = this.conexion.createStatement().executeQuery(query);
+    
+        int numero = 0;
+        if (rs.next()) {
+            numero = rs.getInt(1);
+        }
+    
+        conexion.close();
+        return Response.ok(numero).build();
+    }
+
+    @GET
+    @Path("/deportes")
+    @Produces(MediaType.APPLICATION_XML)
+    public Response ej12() throws SQLException{
+        String query = "select distinct deporte from deportistas order by deporte ASC";
+        
+
+        ResultSet rs = this.conexion.createStatement().executeQuery(query);
+
+        while (rs.next()) {
+            rs.getString(0);
+
+        }
+    }
 
 
     public static void main(String[] args) {
