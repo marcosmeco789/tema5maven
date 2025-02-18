@@ -254,39 +254,118 @@ public class Deportistas {
         return Response.ok(deportistaEntity).build();
     }
 
-    // EJ11: Contar deportistas (/sdepor): Cuenta el número de deportistas distintos
     @GET
     @Path("/sdepor")
     public Response ej11() throws SQLException {
         abrirConexion("ad_tema6", "localhost", "root", "");
         String query = "SELECT COUNT(DISTINCT id) FROM deportistas;";
-    
+
         ResultSet rs = this.conexion.createStatement().executeQuery(query);
-    
+
         int numero = 0;
         if (rs.next()) {
             numero = rs.getInt(1);
         }
-    
+
         conexion.close();
         return Response.ok(numero).build();
     }
 
     @GET
     @Path("/deportes")
-    @Produces(MediaType.APPLICATION_XML)
-    public Response ej12() throws SQLException{
+    @Produces(MediaType.TEXT_PLAIN)
+    public Response ej12() throws SQLException {
+        abrirConexion("ad_tema6", "localhost", "root", "");
         String query = "select distinct deporte from deportistas order by deporte ASC";
-        
+        ArrayList<String> deportesOrdenados = new ArrayList<>();
 
         ResultSet rs = this.conexion.createStatement().executeQuery(query);
 
         while (rs.next()) {
-            rs.getString(0);
+            deportesOrdenados.add(rs.getString(1));
 
         }
+        conexion.close();
+
+        String result = String.join(", ", deportesOrdenados);
+        return Response.ok(result).build();
     }
 
+    @POST
+    @Path("/")
+    @Produces({ MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON })
+    @Consumes({ MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON })
+    public Response ej13(Deportista d) throws SQLException {
+
+        String query = "INSERT INTO deportistas (nombre, activo, genero, deporte) VALUES (?, ?, ?, ?)";
+        abrirConexion("ad_tema6", "localhost", "root", "");
+        PreparedStatement ps = conexion.prepareStatement(query);
+        ps.setString(1, d.getNombre());
+        ps.setBoolean(2, d.isActivo());
+        ps.setString(3, d.getGenero());
+        ps.setString(4, d.getDeporte());
+        ps.executeUpdate();
+        conexion.close();
+        return Response.ok().entity("Añadido correctamente!").build();
+
+    }
+
+    @POST
+    @Path("/")
+    @Consumes("application/x-www-form-urlencoded")
+    @Produces(MediaType.APPLICATION_JSON)
+    public Response personaFormulario(@FormParam("nombre") String nombre,
+            @FormParam("activo") Boolean activo, @FormParam("genero") String genero,
+            @FormParam("deporte") String deporte) throws SQLException {
+
+        String query = "INSERT INTO deportistas (nombre, activo, genero, deporte) VALUES (?, ?, ?, ?)";
+        abrirConexion("ad_tema6", "localhost", "root", "");
+        PreparedStatement ps = conexion.prepareStatement(query);
+        ps.setString(1, nombre);
+        ps.setBoolean(2, activo);
+        ps.setString(3, genero);
+        ps.setString(4, deporte);
+        ps.executeUpdate();
+        conexion.close();
+
+        return Response.ok().entity("Añadido correctamente!").build();
+    }
+
+    @POST
+    @Path("/adds")
+    @Produces({ MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON })
+    @Consumes({ MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON })
+    public Response ej15(ArrayList<Deportista> multiplesDeportistas) throws SQLException {
+        if (multiplesDeportistas == null || multiplesDeportistas.isEmpty()) {
+            return Response.status(Response.Status.BAD_REQUEST).entity("La lista de deportistas no puede estar vacía")
+                    .build();
+        }
+
+        String query = "INSERT INTO deportistas (nombre, activo, genero, deporte) VALUES (?, ?, ?, ?)";
+        abrirConexion("ad_tema6", "localhost", "root", "");
+        try {
+            for (Deportista d : multiplesDeportistas) {
+                PreparedStatement ps = conexion.prepareStatement(query);
+                ps.setString(1, d.getNombre());
+                ps.setBoolean(2, d.isActivo());
+                ps.setString(3, d.getGenero());
+                ps.setString(4, d.getDeporte());
+                ps.executeUpdate();
+            }
+            return Response.ok().entity("Añadido correctamente!").build();
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity("Error al añadir deportistas").build();
+        } finally {
+            if (conexion != null) {
+                try {
+                    conexion.close();
+                } catch (SQLException e) {
+                    e.printStackTrace();
+                }
+            }
+        }
+    }
 
     public static void main(String[] args) {
         Deportistas dp = new Deportistas();
