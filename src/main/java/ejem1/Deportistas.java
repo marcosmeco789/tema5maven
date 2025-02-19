@@ -367,6 +367,83 @@ public class Deportistas {
         }
     }
 
+    @PUT
+    @Path("/")
+    @Produces({ MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON })
+    @Consumes({ MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON })
+    public Response ej16(Deportista d) throws SQLException {
+        String query = "UPDATE deportistas SET nombre = ?, activo = ?, genero = ?, deporte = ? WHERE id = ?";
+        abrirConexion("ad_tema6", "localhost", "root", "");
+        try {
+            PreparedStatement ps = this.conexion.prepareStatement(query);
+
+            ps.setString(1, d.getNombre());
+            ps.setBoolean(2, d.isActivo());
+            ps.setString(3, d.getGenero());
+            ps.setString(4, d.getDeporte());
+            ps.setInt(5, d.getId());
+            ps.executeUpdate();
+
+            conexion.close();
+            return Response.ok().entity("modificado correctamente").build();
+        } catch (SQLException e) {
+            conexion.close();
+            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity("Error al modificar deportistas")
+                    .build();
+        }
+
+    }
+
+    @DELETE
+    @Path("/del/{id}")
+    public Response ej17(@PathParam("id") int id) throws SQLException {
+        String query = "DELETE FROM deportistas WHERE id = ?";
+        abrirConexion("ad_tema6", "localhost", "root", "");
+        try {
+            PreparedStatement ps = this.conexion.prepareStatement(query);
+            ps.setInt(1, id);
+            ps.executeQuery();
+            conexion.close();
+            return Response.ok().entity("Eliminador correctamente").build();
+        } catch (SQLException e) {
+            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity("Error al eliminar deportista")
+                    .build();
+        }
+
+    }
+
+    // file y fileinput stream
+    @GET
+    @Path("/img/{id}/{num}")
+    @Produces(MediaType.TEXT_PLAIN)
+    //@Produces(MediaType.TEXT_PLAIN)
+    public Response ej18(@PathParam("id") int id, @PathParam("num") int num) throws SQLException {
+        String query = "SELECT nombre,path FROM imagenes WHERE id = ? and nombre like '?_?_%'";
+        abrirConexion("ad_tema6", "localhost", "root", "");
+        try {
+            PreparedStatement ps = this.conexion.prepareStatement(query);
+            ps.setInt(1, id);
+            ps.setInt(2, id);
+            ps.setInt(3, num);
+            ResultSet rs = ps.executeQuery();
+
+            if (rs.next()) {
+                String ruta = rs.getString(1) + rs.getString(2);
+                conexion.close();
+                System.out.println("la ruta es "+ruta);
+                return Response.ok().entity(ruta).build();
+            } 
+            return Response.ok().build();
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+            System.out.println(e.getErrorCode());
+        
+            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity("Error al mostrar imagen")
+                    .build();
+        }
+    }
+
     public static void main(String[] args) {
         Deportistas dp = new Deportistas();
 
