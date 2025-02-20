@@ -1,5 +1,8 @@
 package ejem1;
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
@@ -415,34 +418,42 @@ public class Deportistas {
     // file y fileinput stream
     @GET
     @Path("/img/{id}/{num}")
-    @Produces(MediaType.TEXT_PLAIN)
-    //@Produces(MediaType.TEXT_PLAIN)
+    @Produces("image/jpg")
     public Response ej18(@PathParam("id") int id, @PathParam("num") int num) throws SQLException {
-        String query = "SELECT nombre,path FROM imagenes WHERE id = ? and nombre like '?_?_%'";
+        String query = "SELECT path, nombre FROM imagenes WHERE nombre LIKE ?";
         abrirConexion("ad_tema6", "localhost", "root", "");
         try {
             PreparedStatement ps = this.conexion.prepareStatement(query);
-            ps.setInt(1, id);
-            ps.setInt(2, id);
-            ps.setInt(3, num);
+            ps.setString(1, id + "_" + num + "_%");
             ResultSet rs = ps.executeQuery();
 
+            String ruta = "";
             if (rs.next()) {
-                String ruta = rs.getString(1) + rs.getString(2);
+                ruta = rs.getString("path") + "/" + rs.getString("nombre");
                 conexion.close();
-                System.out.println("la ruta es "+ruta);
-                return Response.ok().entity(ruta).build();
-            } 
-            return Response.ok().build();
+            } else {
+                conexion.close();
+                return Response.status(Response.Status.NOT_FOUND).entity("Imagen no encontrada").build();
+            }
 
+            File f = new File(ruta);
+            if (!f.exists()) {
+                return Response.status(Response.Status.NOT_FOUND).entity("Imagen no encontrada").build();
+            }
+
+            try (FileInputStream fi = new FileInputStream(f)) {
+                byte[] imageData = fi.readAllBytes();
+                return Response.ok(imageData).build();
+            } catch (IOException e) {
+                e.printStackTrace();
+                return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity("Error al leer la imagen").build();
+            }
         } catch (SQLException e) {
             e.printStackTrace();
-            System.out.println(e.getErrorCode());
-        
-            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity("Error al mostrar imagen")
-                    .build();
+            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity("Error al mostrar imagen").build();
         }
     }
+    
 
     public static void main(String[] args) {
         Deportistas dp = new Deportistas();
